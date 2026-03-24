@@ -1,0 +1,78 @@
+/* ============================================
+   WeatherLens — Editorial Design Foundation
+   Warm, hand-crafted, organic aesthetic
+   ============================================ */
+
+:root {
+  /* Warm cream & paper tones */
+  --bg: #f6f3ee;
+  --surface-1: #ffffff;
+  --surface-2: #efebe4;
+  --surface-3: #e5e0d7;
+  --surface-4: #dbd5ca;
+
+  /* Warm, earth-tone accents */
+  --primary: #a0634b;
+  --primary-soft: rgba(160, 99, 75, 0.1);
+  --accent: #5d8a6e;
+  --accent-soft: rgba(93, 138, 110, 0.08);
+  --warm: #c49a3c;
+  --warm-soft: rgba(196, 154, 60, 0.08);
+  --sky: #6889a8;
+  --sky-soft: rgba(104, 137, 168, 0.08);
+  --rose: #b85c65;
+  --rose-soft: rgba(184, 92, 101, 0.08);
+
+  /* Warm ink tones */
+  --text-1: #1e1c19;
+  --text-2: #524e46;
+  --text-3: #7f7a6f;
+  --text-4: #a8a295;
+
+  --border: rgba(0, 0, 0, 0.07);
+  --border-hover: rgba(0, 0, 0, 0.12);
+
+  /* Soft, organic shadows */
+  --shadow-sm: 0 1px 3px rgba(120, 100, 70, 0.06), 0 1px 2px rgba(120, 100, 70, 0.04);
+  --shadow-md: 0 4px 12px rgba(120, 100, 70, 0.07), 0 1px 3px rgba(120, 100, 70, 0.05);
+  --shadow-lg: 0 8px 24px rgba(120, 100, 70, 0.08), 0 2px 6px rgba(120, 100, 70, 0.04);
+
+  /* Typography — serif headlines + clean sans body */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-soft: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text-1);
+  min-height: 100vh;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+::selection { background: rgba(160, 99, 75, 0.15); color: #1e1c19; }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-4); }
+
+/* === Animations — subtle, organic === */
+@keyframes enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes spin { to { transform: rotate(360deg); } }
