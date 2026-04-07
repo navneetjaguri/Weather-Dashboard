@@ -43,7 +43,12 @@ export function useGeolocation() {
 export async function getLocationName(lat, lon) {
   try {
     const nominatim = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&zoom=10`
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&zoom=10`,
+      {
+        headers: {
+          'User-Agent': 'WeatherLens/1.0 (contact: support@weatherlens.app)',
+        },
+      }
     );
     const data = await nominatim.json();
     if (data?.address) {
@@ -52,7 +57,8 @@ export async function getLocationName(lat, lon) {
       return city ? `${city}, ${state}` : `${lat.toFixed(2)}°, ${lon.toFixed(2)}°`;
     }
     return `${lat.toFixed(2)}°, ${lon.toFixed(2)}°`;
-  } catch {
+  } catch (err) {
+    console.error('Geocoding error:', err);
     return `${lat.toFixed(2)}°, ${lon.toFixed(2)}°`;
   }
 }
