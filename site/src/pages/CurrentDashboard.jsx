@@ -77,7 +77,29 @@ export default function CurrentDashboard({ location }) {
       </div>
     );
   }
-  if (error) return <div className="error-bar">⚠ {error}</div>;
+
+  if (error) {
+    return (
+      <div className="error-bar">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span>⚠ {error}</span>
+          <button 
+            onClick={() => window.location.reload()} 
+            style={{ 
+              background: 'rgba(0,0,0,0.1)', 
+              border: 'none', 
+              padding: '2px 8px', 
+              borderRadius: '4px', 
+              fontSize: '10px', 
+              cursor: 'pointer' 
+            }}
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const d = weather?.daily;
   const c = weather?.current;
