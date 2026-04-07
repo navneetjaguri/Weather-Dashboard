@@ -33,7 +33,10 @@ export default function CurrentDashboard({ location }) {
       getCurrentWeather(location.lat, location.lon, date, location.altitude),
       getAirQuality(location.lat, location.lon, date)
     ]).then(([w, a]) => { setWeather(w); setAq(a); })
-      .catch(e => setError(e.message))
+      .catch(e => {
+        console.error('Weather Fetch Error Details:', e);
+        setError(e.message);
+      })
       .finally(() => setLoading(false));
   }, [location, date]);
 
