@@ -30,7 +30,7 @@ export default function CurrentDashboard({ location }) {
     setLoading(true);
     setError(null);
     Promise.all([
-      getCurrentWeather(location.lat, location.lon, date),
+      getCurrentWeather(location.lat, location.lon, date, location.altitude),
       getAirQuality(location.lat, location.lon, date)
     ]).then(([w, a]) => { setWeather(w); setAq(a); })
       .catch(e => setError(e.message))
@@ -69,7 +69,14 @@ export default function CurrentDashboard({ location }) {
     responsive: [{ breakpoint: 768, options: { chart: { height: 200 } } }]
   });
 
-  if (loading) return <div className="loader-wrap"><div className="loader-spin" /><p className="loader-text">Loading weather…</p></div>;
+  if (loading) {
+    return (
+      <div className="loader-wrap">
+        <div className="loader-spin" />
+        <p className="loader-text">Loading weather…</p>
+      </div>
+    );
+  }
   if (error) return <div className="error-bar">⚠ {error}</div>;
 
   const d = weather?.daily;
