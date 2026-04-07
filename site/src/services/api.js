@@ -1,31 +1,21 @@
-// Using a CORS Proxy to bypass "Failed to fetch" blocks in some browsers
-const PROXY = 'https://api.allorigins.win/raw?url=';
-
+// Simplified API handles direct calls better without the complex date parsing
 const WEATHER_BASE = 'https://api.open-meteo.com/v1/forecast';
 const ARCHIVE_BASE = 'https://archive-api.open-meteo.com/v1/archive';
 const AQ_BASE = 'https://air-quality-api.open-meteo.com/v1/air-quality';
 
-// Simple In-Memory Cache to mitigate rate limits (429 errors)
 const cache = new Map();
 
 async function fetchWithCache(url, params) {
   const query = new URLSearchParams(params).toString();
-  const directUrl = `${url}?${query}`;
+  const fullUrl = `${url}?${query}`;
   
-  if (cache.has(directUrl)) {
-    return cache.get(directUrl);
-  }
+  if (cache.has(fullUrl)) return cache.get(fullUrl);
 
-  // We wrap the direct URL in the proxy to hide it from over-protective blockers
-  const proxiedUrl = `${PROXY}${encodeURIComponent(directUrl)}`;
-
-  const res = await fetch(proxiedUrl);
-  if (!res.ok) {
-    throw new Error(`API Error: ${res.status}`);
-  }
+  const res = await fetch(fullUrl);
+  if (!res.ok) throw new Error(`API Error: ${res.status}`);
 
   const data = await res.json();
-  cache.set(directUrl, data);
+  cache.set(fullUrl, data);
   return data;
 }
 
@@ -33,12 +23,11 @@ export async function getCurrentWeather(lat, lon, date, altitude) {
   const params = {
     latitude: lat,
     longitude: lon,
-    daily: ['temperature_2m_max', 'temperature_2m_min', 'precipitation_sum', 'precipitation_probability_max', 'uv_index_max', 'sunrise', 'sunset', 'wind_speed_10m_max'].join(','),
-    hourly: ['temperature_2m', 'relative_humidity_2m', 'wind_speed_10m', 'precipitation'].join(','),
-    current: ['temperature_2m', 'relative_humidity_2m', 'precipitation', 'wind_speed_10m', 'weather_code'].join(','),
+    daily: 'temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,uv_index_max,sunrise,sunset,wind_speed_10m_max',
+    hourly: 'temperature_2m,relative_humidity_2m,wind_speed_10m,precipitation',
+    current: 'temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m,weather_code',
     timezone: 'auto',
-    start_date: date,
-    end_date: date
+    forecast_days: 1 // Gets today's data automatically
   };
 
   if (altitude != null && !isNaN(altitude)) {
