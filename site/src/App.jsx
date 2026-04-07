@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useGeolocation, getLocationName } from './services/location';
 import CurrentDashboard from './pages/CurrentDashboard';
 import HistoricalDashboard from './pages/HistoricalDashboard';
-import { MapPin, Cloud, History, Zap, Pencil } from 'lucide-react';
+import { MapPin, Cloud, History, Zap, Pencil, Search, X } from 'lucide-react';
 import './App.css';
 
 function App() {
@@ -13,6 +13,10 @@ function App() {
   const [showLocationInput, setShowLocationInput] = useState(false);
   const [latInput, setLatInput] = useState('');
   const [lonInput, setLonInput] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
   const routeLocation = useLocation();
 
   const activeLocation = manualLocation || location;
@@ -22,6 +26,45 @@ function App() {
       getLocationName(activeLocation.lat, activeLocation.lon).then(setLocationName);
     }
   }, [activeLocation]);
+
+  // Search for locations using Nominatim
+  const handleSearch = async (query) => {
+    setSearchQuery(query);
+    
+    if (query.length < 2) {
+      setSearchResults([]);
+      setShowSearchResults(false);
+      return;
+    }
+
+    setSearchLoading(true);
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=8`,
+        {
+          headers: {
+            'User-Agent': 'WeatherLens/1.0'
+          }
+        }
+      );
+      const data = await response.json();
+      setSearchResults(data);
+      setShowSearchResults(true);
+    } catch (error) {
+      console.error('Search error:', error);
+      setSearchResults([]);
+    }
+    setSearchLoading(false);
+  };
+
+  const handleSelectLocation = (result) => {
+    const lat = parseFloat(result.lat);
+    const lon = parseFloat(result.lon);
+    setManualLocation({ lat, lon, altitude: null });
+    setSearchQuery('');
+    setSearchResults([]);
+    setShowSearchResults(false);
+  };
 
   const handleSetLocation = () => {
     const lat = parseFloat(latInput);
@@ -45,6 +88,107 @@ function App() {
             <div className="nav-logo"><Zap size={14} /></div>
             <span className="nav-name">WeatherLens</span>
           </div>
+          
+          <div style={{ position: 'relative', flex: 1, maxWidth: '300px', marginLeft: '20px' }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              background: '#f5f5f5',
+              borderRadius: '6px',
+              padding: '6px 10px',
+              border: '1px solid #e0e0e0'
+            }}>
+              <Search size={14} style={{ color: '#999' }} />
+              <input
+                type="text"
+                placeholder="Search location..."
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
+                style={{
+                  border: 'none',
+                  background: 'transparent',
+                  outline: 'none',
+                  fontSize: '12px',
+                  flex: 1,
+                  fontFamily: 'inherit'
+                }}
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => {
+                    setSearchQuery('');
+                    setSearchResults([]);
+                    setShowSearchResults(false);
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: '0'
+                  }}
+                >
+                  <X size={14} style={{ color: '#999' }} />
+                </button>
+              )}
+            </div>
+
+            {showSearchResults && searchResults.length > 0 && (
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                left: 0,
+                right: 0,
+                background: 'white',
+                border: '1px solid #e0e0e0',
+                borderRadius: '6px',
+                marginTop: '4px',
+                maxHeight: '300px',
+                overflowY: 'auto',
+                zIndex: 1000,
+                boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+              }}>
+                {searchResults.map((result, idx) => (
+                  <div
+                    key={idx}
+                    onClick={() => handleSelectLocation(result)}
+                    style={{
+                      padding: '10px 12px',
+                      borderBottom: idx < searchResults.length - 1 ? '1px solid #f0f0f0' : 'none',
+                      cursor: 'pointer',
+                      fontSize: '12px',
+                      transition: 'background 0.15s'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = '#f9f9f9'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+                  >
+                    <div style={{ fontWeight: '500', color: '#333' }}>
+                      {result.name}
+                    </div>
+                    <div style={{ fontSize: '10px', color: '#999', marginTop: '2px' }}>
+                      {result.display_name?.split(',').slice(0, 2).join(', ')}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {searchLoading && (
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                left: 0,
+                right: 0,
+                padding: '10px',
+                fontSize: '12px',
+                color: '#999',
+                marginTop: '4px'
+              }}>
+                Searching...
+              </div>
+            )}
+          </div>
+
           <div className="nav-location" onClick={() => setShowLocationInput(!showLocationInput)} style={{ cursor: 'pointer' }}>
             <MapPin size={12} strokeWidth={2.5} />
             <span>{geoLoading ? 'Locating…' : locationName}</span>
