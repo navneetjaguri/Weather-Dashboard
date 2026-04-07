@@ -1,4 +1,6 @@
-// No more axios! Standard fetch is often more stable for CORS.
+// Using a CORS Proxy to bypass "Failed to fetch" blocks in some browsers
+const PROXY = 'https://api.allorigins.win/raw?url=';
+
 const WEATHER_BASE = 'https://api.open-meteo.com/v1/forecast';
 const ARCHIVE_BASE = 'https://archive-api.open-meteo.com/v1/archive';
 const AQ_BASE = 'https://air-quality-api.open-meteo.com/v1/air-quality';
@@ -8,23 +10,22 @@ const cache = new Map();
 
 async function fetchWithCache(url, params) {
   const query = new URLSearchParams(params).toString();
-  const fullUrl = `${url}?${query}`;
+  const directUrl = `${url}?${query}`;
   
-  if (cache.has(fullUrl)) {
-    console.log('[Cache] Serving:', fullUrl);
-    return cache.get(fullUrl);
+  if (cache.has(directUrl)) {
+    return cache.get(directUrl);
   }
 
-  const res = await fetch(fullUrl);
+  // We wrap the direct URL in the proxy to hide it from over-protective blockers
+  const proxiedUrl = `${PROXY}${encodeURIComponent(directUrl)}`;
+
+  const res = await fetch(proxiedUrl);
   if (!res.ok) {
-    if (res.status === 429) {
-      throw new Error("Server is reaching limit. Retrying shortly...");
-    }
-    throw new Error(`API Error: ${res.status} ${res.statusText}`);
+    throw new Error(`API Error: ${res.status}`);
   }
 
   const data = await res.json();
-  cache.set(fullUrl, data);
+  cache.set(directUrl, data);
   return data;
 }
 
